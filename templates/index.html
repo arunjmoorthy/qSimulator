@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+
+{% block title %} Home {% endblock %}
+{% load static %}
+
+{% block css %} 
+    <link rel="stylesheet" href="{% static 'css/index.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.css"
+        integrity="sha256-aa0xaJgmK/X74WM224KMQeNQC2xYKwlAt08oZqjeF0E=" crossorigin="anonymous" />
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <form action="{% url 'index' %}" method="post">
+            <div class="row justify-content-center">
+                {% csrf_token %}
+                <div class="col-10 col-sm-9 col-md-6 col-lg-6 py-4">
+                    <div class="mb-3">
+                        <label for="random_paulis" class="form-label">Number of random Paulis</label>
+                        <input type="number" min="0" max="100" class="form-control shadow-none" name="random_paulis" placeholder="(Between 0 and 100)​" required>
+                    </div>
+                </div>
+                <div class="col-10 col-sm-9 col-md-6 col-lg-6 py-4">
+                    <div class="mb-3">
+                        <label for="random_paulis" class="form-label d-inline-block">Number of physical qubits</label>
+                        <select class="form-select shadow-none" name="number_qubits" required>
+                            <option value="">Choose number of physical qubits</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-7 col-sm-7 col-md-6 col-lg-6">
+                    <div class="">
+                        <span class="pe-3">Bonus Output:​</span>
+                        <span class="pe-4">Error plot?​</span>
+                        <input class="form-check-input mt-0 shadow-none" type="checkbox" name="error_plot">
+                    </div>
+                </div>
+                <div class="col-5 col-sm-5 col-md-6 col-lg-6 text-center">
+                    <button type="submit" class="btn btn-primary px-5 fs-5 text-white rounded rounded-pill">Start</button>
+                </div>
+            </div>
+            <!-- <p class="text-danger fs-4" id="error_div"></p> -->
+            
+        </form>
+
+        {% if show == 'show' %}
+            <div class="row py-5">
+                <h3 class="text-center"><b>Output</b></h3>
+            
+                <div class="col-6">
+                    <label for="result_random_paulis">Number of cliques:</label>
+
+                    <input type="number" value="{{ result.length }}" class="shadow-none" readonly>
+                </div>
+                <!-- matrix -->
+                <div class="col-12 py-2">
+                    {% for data in result.cliques_data %}
+                        <p class="mb-0">Clique {{forloop.counter}}: {{ data }}</p>
+                    {% endfor %}
+                </div>
+                <!-- table -->
+                <div class="col-12 py-4">
+                    <table class="table table-striped text-center">
+                        <thead>
+                            <tr>
+                                <th>Trotterization order</th>
+                                <th>#of physical operations (Without/with Cliques)</th>
+                                <th>Ratios</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table_body">
+                            {% for row in result.table %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ row.0 }} / {{ row.1 }}</td>
+                                    <td>{{ row.2 }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <!-- normal image -->
+                <!-- <div class="col-12 px-0 ">
+                    <div class="row justify-content-center align-items-center">
+                        <div class="col-6">
+                            <img src="http://{{ base }}{{ result.normal }}" class="img-fluid" alt="image one">
+                        </div>
+                        <div class="col-6">
+                            <p class="text-center">{{ result.text_one }}</p>
+                        </div>
+                    </div>
+                </div> -->
+                <div class="col-12 mb-5">
+                    <canvas id="first_chart"></canvas>
+                </div>
+                <div class="col-12">
+                    <canvas id="second_chart"></canvas>
+                </div>
+                <!-- error image  -->
+                {% if result.error %}
+                    <!-- <div class="col-12 px-0 mt-4">
+                        <div class="row justify-content-center align-items-center">
+                            <div class="col-6">
+                                <img src="http://{{ base }}{{ result.error }}" class="img-fluid" alt="image two">
+                            </div>
+                            <div class="col-6">
+                                <p class="text-center">
+                                    {{ result.text_two }}
+                                </p>
+                            </div>
+                        </div>
+                    </div> -->
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
+
+
+{% block javascript %}
+    <!-- <script src="{% static 'js/index.js' %}">
+        console.log("welcome")
+    </script> -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.2.1"></script>
+    {% if show == 'show' %}
+        <script>
+            const ctx = document.getElementById('first_chart').getContext('2d');
+            var normal = "{{ result.normal }}"
+            var error = "{{ result.error }}"
+            const data = []
+            const labels = []
+            normal = JSON.parse(normal)
+            normal[0].forEach((arr, index) => {
+                labels.push(index * 3)
+            })
+            normal.forEach((arr, index) => {
+                const fillPattern = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+                data.push({
+                    label: `Value ${index}`,
+                    data: arr,
+                    backgroundColor: fillPattern,
+                    borderColor: fillPattern,
+                    borderWidth: 1
+                })
+            });
+            // console.log(data)
+            const myChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: data,
+                    },
+                });
+            if (error != '') {
+                console.log(error)
+                const ctx_second = document.getElementById('second_chart').getContext('2d');
+                const data_error = []
+                const labels_error = []
+                error = JSON.parse(error)
+                error[0].forEach((arr, index) => {
+                    labels_error.push((0.02 + 0.02*index).toFixed(2))
+                })
+                error.forEach((arr, index) => {
+                    const fillPattern = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+                    data_error.push({
+                        label: `Value ${index}`,
+                        data: arr,
+                        backgroundColor: fillPattern,
+                        borderColor: fillPattern,
+                        borderWidth: 1
+                    })
+                });
+                // console.log(data)
+                const error_chart = new Chart(ctx_second, {
+                    type: 'line',
+                    data: {
+                        labels: labels_error,
+                        datasets: data_error,
+                    },
+                });
+            }
+        </script>
+        
+            
+        <script src="{% static 'js/plot.js' %}"></script>
+    {% endif %}
+{% endblock %}
