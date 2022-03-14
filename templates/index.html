@@ -17,7 +17,7 @@
                 <div class="col-10 col-sm-9 col-md-6 col-lg-6 py-4">
                     <div class="mb-3">
                         <label for="random_paulis" class="form-label">Number of random Paulis</label>
-                        <input type="number" min="0" max="100" class="form-control shadow-none" name="random_paulis" placeholder="(Between 0 and 100)​" required>
+                        <input type="number" min="30" max="100" class="form-control shadow-none" name="random_paulis" placeholder="(Between 30 and 100)​" required>
                     </div>
                 </div>
                 <div class="col-10 col-sm-9 col-md-6 col-lg-6 py-4">
@@ -137,16 +137,28 @@
             normal[0].forEach((arr, index) => {
                 labels.push(index * 3)
             })
+
+            // new test
+            let normal_labels = ['Without Cliques', 'With Cliques', 'Without Cliques', 'With Cliques', 'Without Cliques', 'With Cliques']
+            let normal_color = ['#4ce1ff', '#000', '#4ce1ff', '#000', '#4ce1ff', '#000']
             normal.forEach((arr, index) => {
-                const fillPattern = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+                // const fillPattern = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+                // data.push({
+                //     label: `Value ${index}`,
+                //     data: arr,
+                //     backgroundColor: fillPattern,
+                //     borderColor: fillPattern,
+                //     borderWidth: 1
+                // })
                 data.push({
-                    label: `Value ${index}`,
+                    label: normal_labels[index],
                     data: arr,
-                    backgroundColor: fillPattern,
-                    borderColor: fillPattern,
+                    backgroundColor: normal_color[index],
+                    borderColor: normal_color[index],
                     borderWidth: 1
                 })
             });
+            let test = ['With Cliques', 'Without Cliques']
             // console.log(data)
             const myChart = new Chart(ctx, {
                     type: 'line',
@@ -154,6 +166,44 @@
                         labels: labels,
                         datasets: data,
                     },
+                    options: {
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Benefit of the Clique Method',
+                                padding: {
+                                    top: 25,
+                                    bottom: 20,
+                                },
+                                font: {
+                                    size: 24,
+                                }
+                                // #53a7c6
+                            }
+                        },
+                        scales: {
+                            x: {
+                                title: {
+                                    text: 'Number of Paulis',
+                                    display: true,
+                                    padding: 20,
+                                    font: {
+                                        size: 18,
+                                    }
+                                },
+                            },
+                            y: {
+                                title: {
+                                    text: 'Log_10 of Number of Physical Operations',
+                                    display: true,
+                                    padding: 10,
+                                    font: {
+                                        size: 18,
+                                    }
+                                },
+                            },
+                        },
+                    }
                 });
             if (error != '') {
                 console.log(error)
@@ -164,15 +214,19 @@
                 error[0].forEach((arr, index) => {
                     labels_error.push((0.02 + 0.02*index).toFixed(2))
                 })
+                let error_labels = ['', '1st order', '2nd order', '3rd order']
+                let error_colors = ['', '#4275c6', '#ec7c30', '#fe0103']
                 error.forEach((arr, index) => {
-                    const fillPattern = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
-                    data_error.push({
-                        label: `Value ${index}`,
-                        data: arr,
-                        backgroundColor: fillPattern,
-                        borderColor: fillPattern,
-                        borderWidth: 1
-                    })
+                    // const fillPattern = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+                    if (index != 0) {
+                        data_error.push({
+                            label: error_labels[index],
+                            data: arr,
+                            backgroundColor: error_colors[index],
+                            borderColor: error_colors[index],
+                            borderWidth: 1
+                        })
+                    }
                 });
                 // console.log(data)
                 const error_chart = new Chart(ctx_second, {
@@ -181,6 +235,44 @@
                         labels: labels_error,
                         datasets: data_error,
                     },
+                    options: {
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Error for Different Orders of Trotterization',
+                                padding: {
+                                    top: 25,
+                                    bottom: 20,
+                                },
+                                font: {
+                                    size: 24,
+                                }
+                                // #53a7c6
+                            }
+                        },
+                        scales: {
+                            x: {
+                                title: {
+                                    text: 'Time',
+                                    display: true,
+                                    padding: 20,
+                                    font: {
+                                        size: 18,
+                                    }
+                                },
+                            },
+                            y: {
+                                title: {
+                                    text: 'log_10 Trace Distance (accuracy)',
+                                    display: true,
+                                    padding: 10,
+                                    font: {
+                                        size: 18,
+                                    }
+                                },
+                            },
+                        },
+                    }
                 });
             }
         </script>

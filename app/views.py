@@ -13,10 +13,10 @@ def index(request):
         random_paulis = request.POST.get('random_paulis')
         physical_qubits = request.POST.get('number_qubits')
         error_plot = request.POST.get('error_plot')
-        all_images = os.listdir('./media/graph/')
+        all_images = os.listdir('simulator/media/graph/')
         if len(all_images) > 0:
             for data in all_images:
-                os.remove('./media/graph/'+data)
+                os.remove('simulator/media/graph/'+data)
         if error_plot == 'on':
             error_plot = True
             result = streamyescheck(int(random_paulis), int(physical_qubits))
@@ -267,9 +267,9 @@ def streamnocheck(npaulis, nregs):
         nocliques = math.pow(2 * npaulis - 1, 5 * (i + 1))
         withcliques = math.pow(2 * ncliques - 1, 5 * (i + 1))
         ratio = withcliques / nocliques
-        nocliques = '{:0.3e}'.format(nocliques)
-        withcliques = '{:0.3e}'.format(withcliques)
-        ratio = '{:0.3e}'.format(ratio)
+        # nocliques = '{:0.3e}'.format(nocliques)
+        # withcliques = '{:0.3e}'.format(withcliques)
+        # ratio = '{:0.3e}'.format(ratio)
         table.append([nocliques, withcliques, ratio])
     output = clique_savings_plot(npaulis, nregs, False)
     result = {
@@ -291,9 +291,9 @@ def streamyescheck(npaulis, nregs):
         nocliques = math.pow(2 * npaulis - 1, 5 * (i + 1))
         withcliques = math.pow(2 * ncliques - 1, 5 * (i + 1))
         ratio = withcliques / nocliques
-        nocliques = '{:0.3e}'.format(nocliques)
-        withcliques = '{:0.3e}'.format(withcliques)
-        ratio = '{:0.3e}'.format(ratio)
+        # nocliques = '{:0.3e}'.format(nocliques)
+        # withcliques = '{:0.3e}'.format(withcliques)
+        # ratio = '{:0.3e}'.format(ratio)
         table.append([nocliques, withcliques, ratio])
     output = clique_savings_plot(npaulis, nregs, False)
     tset = numpy.arange(0.01, 0.1, 0.005)
